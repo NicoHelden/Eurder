@@ -20,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -136,13 +137,15 @@ public class UserServiceTest {
     void givenValidUser_whenRegisterUser_thenShouldReturnUserDTO() {
         // Given
         CreateUserDTO createUserDTO = new CreateUserDTO("John", "Doe", "john.doe@email.com", "address", "123-456-7890", "password");
+        User userToReturn = new User("John", "Doe", "john.doe@email.com", "address", "123-456-7890", Role.ADMIN, "password");
         when(userRepositoryMock.getAllCustomers()).thenReturn(Collections.emptyList());
+        when(userRepositoryMock.save(any(User.class))).thenReturn(userToReturn); // Mock the save method
 
         // When
         UserDTO registeredUser = userService.registerUser(createUserDTO);
 
         // Then
-        assertThat(registeredUser).isNotNull();  // Adjust this assertion based on what you expect
+        assertThat(registeredUser).isNotNull();
     }
 
     @Test
@@ -156,7 +159,7 @@ public class UserServiceTest {
         Collection<UserDTO> allUsers = userService.getAllUsers();
 
         // Then
-        assertThat(allUsers).isNotEmpty();  // Adjust this assertion based on what you expect
+        assertThat(allUsers).isNotEmpty();
     }
 
     @Test
