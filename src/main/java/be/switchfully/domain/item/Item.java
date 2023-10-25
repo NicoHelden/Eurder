@@ -1,5 +1,7 @@
 package be.switchfully.domain.item;
 
+import java.util.UUID;
+
 public class Item {
     private String id;
     private String name;
@@ -8,6 +10,7 @@ public class Item {
     private int amount;
 
     public Item(String name, String description, Double price, int amount) {
+        this.id = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
         this.price = price;

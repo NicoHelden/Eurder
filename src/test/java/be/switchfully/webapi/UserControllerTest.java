@@ -1,9 +1,11 @@
 package be.switchfully.webapi;
 
 import be.switchfully.domain.user.CreateUserDTO;
+import be.switchfully.domain.user.Feature;
 import be.switchfully.domain.user.UserDTO;
 import be.switchfully.service.SecurityService;
 import be.switchfully.service.UserService;
+import be.switchfully.service.exception.UnauthorizatedException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 public class UserControllerTest {
@@ -60,5 +63,18 @@ public class UserControllerTest {
 
         assertThat(response.getStatus()).isEqualTo(200); // HTTP Status OK
         assertThat(response.getEntity()).isEqualTo(expectedUsers);
+    }
+    @Test
+    void givenNonAdminUser_whenGetAllUsers_thenForbidden() {
+        // Given
+        String authorization = "Basic non_admin_auth";
+        doThrow(new UnauthorizatedException("Unauthorized")).when(securityService).validateAuthorization(authorization, Feature.GET_ALL_USERS);
+
+        // When
+        Response response = userController.getAllUsers(authorization);
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
+        assertThat(response.getEntity()).isEqualTo("Unauthorized");
     }
 }
