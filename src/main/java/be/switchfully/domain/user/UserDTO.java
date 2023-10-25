@@ -2,6 +2,8 @@ package be.switchfully.domain.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.Objects;
+
 public class UserDTO {
     private String id;
     private String firstName;
@@ -97,5 +99,18 @@ public class UserDTO {
                 ", address='" + address + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDTO userDTO = (UserDTO) o;
+        return Objects.equals(id, userDTO.id) && Objects.equals(firstName, userDTO.firstName) && Objects.equals(lastName, userDTO.lastName) && Objects.equals(email, userDTO.email) && Objects.equals(address, userDTO.address) && Objects.equals(phoneNumber, userDTO.phoneNumber) && role == userDTO.role && Objects.equals(password, userDTO.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, email, address, phoneNumber, role, password);
     }
 }

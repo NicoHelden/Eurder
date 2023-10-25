@@ -55,6 +55,7 @@ public class UserController {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+
     @GET
     @Operation(
             operationId = "getAllUsers",
@@ -67,6 +68,16 @@ public class UserController {
         Collection<UserDTO> users = userService.getAllUsers();
         return Response.ok(users).build();
     }
+
+    @GET
+    @Path("/{id}")
+    @SecurityRequirement(name = "SecurityScheme")
+    public Response getUserById(@PathParam("id") String id, @HeaderParam("Authorization") String authorization) {
+        securityService.validateAuthorization(authorization, Feature.GET_CUSTOMER_DETAILS);
+        UserDTO user = userService.getUserById(id);
+        return Response.ok(user).build();
+    }
+
 
     @ServerExceptionMapper(UnauthorizatedException.class)
     protected Response unauthorizedException(UnauthorizatedException exception) {

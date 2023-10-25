@@ -6,6 +6,7 @@ import be.switchfully.domain.user.UserDTO;
 import be.switchfully.service.SecurityService;
 import be.switchfully.service.UserService;
 import be.switchfully.service.exception.UnauthorizatedException;
+import be.switchfully.service.exception.UnknownUserException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,4 +78,25 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
         assertThat(response.getEntity()).isEqualTo("Unauthorized");
     }
+    @Test
+    void givenUserId_whenGetUserById_thenReturnUserDTO() {
+        UserDTO userDTO = new UserDTO(); // set the necessary fields
+        when(userService.getUserById("1")).thenReturn(userDTO);
+
+        Response response = userController.getUserById("1", "someAuthorizationHeader");
+
+        assertThat(response.getStatus()).isEqualTo(200); // HTTP Status OK
+        assertThat(response.getEntity()).isEqualTo(userDTO);
+    }
+
+    @Test
+    void givenNonExistentUserId_whenGetUserById_thenReturnNotFound() {
+        when(userService.getUserById("99")).thenThrow(new UnknownUserException("User not found"));
+
+        Response response = userController.getUserById("99", "someAuthorizationHeader");
+
+        assertThat(response.getStatus()).isEqualTo(404); // HTTP Status Not Found
+        assertThat(response.getEntity()).isEqualTo("User not found");
+    }
+
 }

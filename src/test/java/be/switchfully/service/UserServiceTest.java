@@ -3,9 +3,12 @@ package be.switchfully.service;
 import be.switchfully.domain.user.CreateUserDTO;
 import be.switchfully.domain.user.Role;
 import be.switchfully.domain.user.User;
+import be.switchfully.domain.user.UserDTO;
+import be.switchfully.mapper.UserMapper;
 import be.switchfully.repository.UserRepository;
 import be.switchfully.service.exception.InvalidEmailException;
 import be.switchfully.service.exception.NonUniqueEmailException;
+import be.switchfully.service.exception.UnknownUserException;
 import io.quarkus.test.Mock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +18,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.Optional;
 
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 
@@ -75,4 +80,27 @@ public class UserServiceTest {
                 .hasMessage("This email already exists.");
     }
 
+    @Test
+    void givenUserId_whenGetUserById_thenReturnUserDTO() {
+        User user = new User(
+                "John",                 // firstName
+                "Doe",                  // lastName
+                "john.doe@example.com", // email
+                "123 Main St",          // address
+                "123-456-7890",         // phoneNumber
+                Role.ADMIN,             // role
+                "password123");          // password
+        when(userRepositoryMock.getUserById("1")).thenReturn(Optional.of(user));
+
+        UserDTO retrievedUser = userService.getUserById("1");
+
+        assertThat(retrievedUser).isEqualTo(UserMapper.mapToDTO(user));
+    }
+
+    @Test
+    void givenNonExistentUserId_whenGetUserById_thenThrowUnknownUserException() {
+        when(userRepositoryMock.getUserById("99")).thenReturn(Optional.empty());
+
+        assertThrows(UnknownUserException.class, () -> userService.getUserById("99"));
+    }
 }

@@ -18,5 +18,6 @@ public class UserRepository {
 
     public Collection<User> getAllCustomers() {return usersById.values();}
 
-    public Optional<User> getUserById(String customerId) {return Optional.ofNullable(usersById.get(customerId));}
+    public Optional<User> getUserById(String userId) {
+        return Optional.ofNullable(usersById.get(userId));}
 }

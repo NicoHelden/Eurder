@@ -1,17 +1,20 @@
 package be.switchfully.service;
 
 import be.switchfully.domain.user.CreateUserDTO;
+import be.switchfully.domain.user.User;
 import be.switchfully.domain.user.UserDTO;
 import be.switchfully.mapper.UserMapper;
 import be.switchfully.repository.UserRepository;
 import be.switchfully.service.exception.InvalidEmailException;
 import be.switchfully.service.exception.NonUniqueEmailException;
+import be.switchfully.service.exception.UnknownUserException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -63,5 +66,12 @@ public class UserService {
     }
     public Collection<UserDTO> getAllUsers() {
         return userRepository.getAllCustomers().stream().map(UserMapper::mapToDTO).collect(Collectors.toSet());
+    }
+    public UserDTO getUserById(String id) {
+        Optional<User> optionalUser = userRepository.getUserById(id);
+        if(!optionalUser.isPresent()) {
+            throw new UnknownUserException("User not found");
+        }
+        return UserMapper.mapToDTO(optionalUser.get());
     }
 }
