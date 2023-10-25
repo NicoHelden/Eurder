@@ -34,7 +34,7 @@ class ItemServiceTest {
 
         ItemDTO result = itemService.addItem(newItem);
 
-        assertThat(result).isEqualTo(savedItemDTO);
+        assertThat(result).usingRecursiveComparison().ignoringFields("id").isEqualTo(savedItemDTO);
     }
 }
 

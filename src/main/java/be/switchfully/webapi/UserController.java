@@ -74,8 +74,12 @@ public class UserController {
     @SecurityRequirement(name = "SecurityScheme")
     public Response getUserById(@PathParam("id") String id, @HeaderParam("Authorization") String authorization) {
         securityService.validateAuthorization(authorization, Feature.GET_CUSTOMER_DETAILS);
-        UserDTO user = userService.getUserById(id);
-        return Response.ok(user).build();
+        try {
+            UserDTO user = userService.getUserById(id);
+            return Response.ok(user).build();
+        } catch (UnknownUserException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
     }
 
 

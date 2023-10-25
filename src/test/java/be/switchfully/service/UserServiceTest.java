@@ -9,20 +9,16 @@ import be.switchfully.repository.UserRepository;
 import be.switchfully.service.exception.InvalidEmailException;
 import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnknownUserException;
-import io.quarkus.test.Mock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -103,4 +99,75 @@ public class UserServiceTest {
 
         assertThrows(UnknownUserException.class, () -> userService.getUserById("99"));
     }
+
+    @Test
+    void givenEmailDoesNotExist_whenExistByEmail_thenShouldReturnFalse() {
+        // Given
+        String email = "nonexistent@email.com";
+        when(userRepositoryMock.getAllCustomers()).thenReturn(Collections.emptyList());
+
+        // When
+        boolean exists = userService.existByEmail(email);
+
+        // Then
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void givenNullEmail_whenExistByEmail_thenShouldThrowIllegalArgumentException() {
+        assertThatThrownBy(() -> userService.existByEmail(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email must be filled");
+    }
+
+    @Test
+    void givenInvalidEmail_whenIsValidEmail_thenShouldReturnFalse() {
+        // Given & When & Then
+        assertThat(userService.isValidEmail("invalid")).isFalse();
+    }
+
+    @Test
+    void givenValidEmail_whenIsValidEmail_thenShouldReturnTrue() {
+        // Given & When & Then
+        assertThat(userService.isValidEmail("test@example.com")).isTrue();
+    }
+
+    @Test
+    void givenValidUser_whenRegisterUser_thenShouldReturnUserDTO() {
+        // Given
+        CreateUserDTO createUserDTO = new CreateUserDTO("John", "Doe", "john.doe@email.com", "address", "123-456-7890", "password");
+        when(userRepositoryMock.getAllCustomers()).thenReturn(Collections.emptyList());
+
+        // When
+        UserDTO registeredUser = userService.registerUser(createUserDTO);
+
+        // Then
+        assertThat(registeredUser).isNotNull();  // Adjust this assertion based on what you expect
+    }
+
+    @Test
+    void whenGetAllUsers_thenReturnListOfUserDTO() {
+        // Given
+        when(userRepositoryMock.getAllCustomers()).thenReturn(
+                Collections.singletonList(new User("John", "Doe", "john.doe@email.com", "address", "123-456-7890", Role.ADMIN, "password"))
+        );
+
+        // When
+        Collection<UserDTO> allUsers = userService.getAllUsers();
+
+        // Then
+        assertThat(allUsers).isNotEmpty();  // Adjust this assertion based on what you expect
+    }
+
+    @Test
+    void givenInvalidUserId_whenGetUserById_thenShouldThrowUnknownUserException() {
+        // Given
+        when(userRepositoryMock.getUserById("invalid")).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> userService.getUserById("invalid"))
+                .isInstanceOf(UnknownUserException.class)
+                .hasMessage("User not found");
+    }
+
 }
