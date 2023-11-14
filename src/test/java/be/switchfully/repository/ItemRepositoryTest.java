@@ -1,29 +1,72 @@
 package be.switchfully.repository;
 
 import be.switchfully.domain.item.Item;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import java.util.UUID;
 
-class ItemRepositoryTest {
+import static org.assertj.core.api.Assertions.assertThat;
 
+@QuarkusTest
+@QuarkusTestResource(H2DatabaseTestResource.class)
+public class ItemRepositoryTest {
+
+    @Inject
     ItemRepository itemRepository;
+
+    private Item testItem;
+
     @BeforeEach
     void setUp() {
-        itemRepository = new ItemRepository();
+        testItem = new Item("Test Item", "Description", 10.0, 5);
+        itemRepository.save(testItem);
     }
 
     @Test
-    void givenItem_whenSave_thenItemIsSaved() {
+    @Transactional
+    void whenSaveItem_thenShouldReturnSavedItem() {
         // Given
-        Item item = new Item("Laptop", "An awesome laptop", 1200.00, 10);
+        Item newItem = new Item("NewItem", "New Description", 20.0, 10);
 
-        Item savedItem = itemRepository.save(item);
+        // When
+        Item savedItem = itemRepository.save(newItem);
 
+        // Then
         assertThat(savedItem).isNotNull();
-        assertThat(savedItem.getName()).isEqualTo("Laptop");
+        assertThat(savedItem.getId()).isNotNull();
+        assertThat(savedItem.getName()).isEqualTo("NewItem");
+        // Additional assertions...
+    }
+
+    @Test
+    void whenGetAllItems_thenShouldReturnListOfItems() {
+        // When
+        List<Item> items = itemRepository.getAll();
+
+        // Then
+        assertThat(items).isNotEmpty();
+        assertThat(items).contains(testItem);
+    }
+
+    @Test
+    @Transactional
+    void givenItemId_whenUpdateItem_thenShouldReturnUpdatedItem() {
+        // Given
+        testItem.setName("Updated Name");
+
+        // When
+        Item updatedItem = itemRepository.update(testItem);
+
+        // Then
+        assertThat(updatedItem).isNotNull();
+        assertThat(updatedItem.getName()).isEqualTo("Updated Name");
     }
 
 }
