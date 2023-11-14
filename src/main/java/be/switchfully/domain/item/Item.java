@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "items", schema = "eurderdb")
+@Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,7 +28,7 @@ public class Item {
     }
 
     public Item(String name, String description, Double price, int amount) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.name = name;
         this.description = description;
         this.price = price;
