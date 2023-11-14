@@ -1,180 +1,106 @@
 package be.switchfully.service;
 
 import be.switchfully.domain.user.CreateUserDTO;
-import be.switchfully.domain.user.Role;
 import be.switchfully.domain.user.User;
 import be.switchfully.domain.user.UserDTO;
-import be.switchfully.mapper.UserMapper;
 import be.switchfully.repository.UserRepository;
-import be.switchfully.service.exception.InvalidEmailException;
 import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnknownUserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    private UserRepository userRepositoryMock;
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
     private UserService userService;
+
+    private CreateUserDTO createUserDTO;
+    private User user;
+    private UserDTO userDTO;
+    private UUID userId;
 
     @BeforeEach
     void setUp() {
-        userRepositoryMock = Mockito.mock(UserRepository.class);
-        userService = new UserService();
-        userService.userRepository = userRepositoryMock;
+        createUserDTO = new CreateUserDTO("John", "Doe", "john@example.com", "123 Street", "1234567890", "password");
+        user = new User("John", "Doe", "john@example.com", "123 Street", "1234567890", "password");
+        userDTO = new UserDTO(); // Initialize with user details
+        userId = UUID.randomUUID();
+        user.setId(userId);
     }
 
     @Test
-    void givenEmailExists_whenExistByEmail_thenShouldReturnTrue() {
-        // Given
-        String email = "test@email.com";
-        when(userRepositoryMock.getAllCustomers()).thenReturn(
-                Collections.singletonList(new User("firstName", "lastName", "test@email.com", "address", "phoneNumber", Role.CUSTOMER, "password"))
-        );
-        // When
-        boolean exists = userService.existByEmail(email);
-        // Then
-        assertThat(exists).isTrue();
-    }
+    void registerUser_whenEmailAlreadyExists_thenThrowException() {
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
-    @Test
-    void givenInvalidEmail_whenRegisterUser_thenShouldThrowInvalidEmailException() {
-        // Given
-        CreateUserDTO createUserDTO = new CreateUserDTO("firstName", "lastName", "test@email.com", "address", "phoneNumber", "password");
-        createUserDTO.setEmail("invalidEmail");
-
-        // When & Then
-        assertThatThrownBy(() -> userService.registerUser(createUserDTO))
-                .isInstanceOf(InvalidEmailException.class)
-                .hasMessage("This email is no valid.");
-    }
-
-    @Test
-    void givenEmailAlreadyExists_whenRegisterUser_thenShouldThrowNonUniqueEmailException() {
-        // Given
-        CreateUserDTO createUserDTO = new CreateUserDTO("firstName", "lastName", "test@email.com", "address", "phoneNumber", "password");
-        String email = "existing@email.com";
-        createUserDTO.setEmail(email);
-        when(userRepositoryMock.getAllCustomers()).thenReturn(
-                Collections.singletonList(new User("firstName", "lastName", "test@email.com", "address", "phoneNumber", Role.CUSTOMER, "password").setEmail(email))
-        );
-
-        // When & Then
         assertThatThrownBy(() -> userService.registerUser(createUserDTO))
                 .isInstanceOf(NonUniqueEmailException.class)
-                .hasMessage("This email already exists.");
-    }
+                .hasMessageContaining("This email already exists.");
 
-    /*
-    @Test
-    void givenUserId_whenGetUserById_thenReturnUserDTO() {
-        User user = new User(
-                "John",                 // firstName
-                "Doe",                  // lastName
-                "john.doe@example.com", // email
-                "123 Main St",          // address
-                "123-456-7890",         // phoneNumber
-                Role.ADMIN,             // role
-                "password123");          // password
-        when(userRepositoryMock.getUserById("1")).thenReturn(Optional.of(user));
-
-        UserDTO retrievedUser = userService.getUserById("1");
-
-        assertThat(retrievedUser).isEqualTo(UserMapper.mapToDTO(user));
-    }
-     */
-
-    /*@Test
-    void givenNonExistentUserId_whenGetUserById_thenThrowUnknownUserException() {
-        when(userRepositoryMock.getUserById("99")).thenReturn(Optional.empty());
-
-        assertThrows(UnknownUserException.class, () -> userService.getUserById("99"));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void givenEmailDoesNotExist_whenExistByEmail_thenShouldReturnFalse() {
-        // Given
-        String email = "nonexistent@email.com";
-        when(userRepositoryMock.getAllCustomers()).thenReturn(Collections.emptyList());
+    void registerUser_whenValidUser_thenSaveUser() {
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        // When
-        boolean exists = userService.existByEmail(email);
+        UserDTO result = userService.registerUser(createUserDTO);
 
-        // Then
-        assertThat(exists).isFalse();
-    }
-     */
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo(createUserDTO.getEmail());
+        // Other assertions
 
-    @Test
-    void givenNullEmail_whenExistByEmail_thenShouldThrowIllegalArgumentException() {
-        assertThatThrownBy(() -> userService.existByEmail(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Email must be filled");
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    void givenInvalidEmail_whenIsValidEmail_thenShouldReturnFalse() {
-        // Given & When & Then
-        assertThat(userService.isValidEmail("invalid")).isFalse();
+    void getAllUsers_whenCalled_thenReturnAllUsers() {
+        when(userRepository.listAll()).thenReturn(Arrays.asList(user));
+
+        var users = userService.getAllUsers();
+
+        assertThat(users).isNotEmpty();
+        assertThat(users).hasSize(1);
+
+        verify(userRepository, times(1)).listAll();
     }
 
     @Test
-    void givenValidEmail_whenIsValidEmail_thenShouldReturnTrue() {
-        // Given & When & Then
-        assertThat(userService.isValidEmail("test@example.com")).isTrue();
+    void getUserById_whenUserExists_thenReturnUser() {
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.of(user));
+
+        UserDTO result = userService.getUserById(userId);
+
+        assertThat(result).isNotNull();
+        // Other assertions
+
+        verify(userRepository, times(1)).findByIdOptional(userId);
     }
 
     @Test
-    void givenValidUser_whenRegisterUser_thenShouldReturnUserDTO() {
-        // Given
-        CreateUserDTO createUserDTO = new CreateUserDTO("John", "Doe", "john.doe@email.com", "address", "123-456-7890", "password");
-        User userToReturn = new User("John", "Doe", "john.doe@email.com", "address", "123-456-7890", Role.ADMIN, "password");
-        when(userRepositoryMock.getAllCustomers()).thenReturn(Collections.emptyList());
-        when(userRepositoryMock.save(any(User.class))).thenReturn(userToReturn); // Mock the save method
+    void getUserById_whenUserDoesNotExist_thenThrowException() {
+        when(userRepository.findByIdOptional(userId)).thenReturn(Optional.empty());
 
-        // When
-        UserDTO registeredUser = userService.registerUser(createUserDTO);
-
-        // Then
-        assertThat(registeredUser).isNotNull();
-    }
-
-    @Test
-    void whenGetAllUsers_thenReturnListOfUserDTO() {
-        // Given
-        when(userRepositoryMock.getAllCustomers()).thenReturn(
-                Collections.singletonList(new User("John", "Doe", "john.doe@email.com", "address", "123-456-7890", Role.ADMIN, "password"))
-        );
-
-        // When
-        Collection<UserDTO> allUsers = userService.getAllUsers();
-
-        // Then
-        assertThat(allUsers).isNotEmpty();
-    }
-/*
-    @Test
-    void givenInvalidUserId_whenGetUserById_thenShouldThrowUnknownUserException() {
-        // Given
-        when(userRepositoryMock.getUserById("invalid")).thenReturn(Optional.empty());
-
-        // When & Then
-        assertThatThrownBy(() -> userService.getUserById("invalid"))
+        assertThatThrownBy(() -> userService.getUserById(userId))
                 .isInstanceOf(UnknownUserException.class)
-                .hasMessage("User not found");
-    }
- */
+                .hasMessageContaining("User not found");
 
+        verify(userRepository, times(1)).findByIdOptional(userId);
+    }
 }

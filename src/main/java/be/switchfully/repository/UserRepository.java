@@ -42,9 +42,6 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
             return user;
         }
     }
-    public Optional<User> findByUsername(String username) {
-        return find("username", username).firstResultOptional();
-    }
 
 
     public boolean deleteById(UUID userId) {
