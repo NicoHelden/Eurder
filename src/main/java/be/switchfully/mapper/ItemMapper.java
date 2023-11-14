@@ -17,9 +17,13 @@ public class ItemMapper {
     }
 
     public static Item mapToEntity(CreateItemDTO createItemDTO) {
+
         return new Item(createItemDTO.getName(), createItemDTO.getDescription(), createItemDTO.getPrice(), createItemDTO.getAmount());
     }
+
     public static Item mapToEntity(ItemDTO itemDTO) {
-        return new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getPrice(), itemDTO.getAmount());
+        Item item = new Item(itemDTO.getName(), itemDTO.getDescription(), itemDTO.getPrice(), itemDTO.getAmount());
+        item.setId(itemDTO.getId());
+        return item;
     }
 }

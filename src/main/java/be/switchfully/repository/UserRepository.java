@@ -1,23 +1,51 @@
 package be.switchfully.repository;
 
 import be.switchfully.domain.user.User;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import static be.switchfully.database.EurderDb.usersById;
 
 @ApplicationScoped
-public class UserRepository {
+public class UserRepository implements PanacheRepositoryBase<User, UUID> {
 
     public User save(User user) {
-        usersById.put(user.getId(), user);
+        if (user.getId() == null) {
+            user.setId(UUID.randomUUID());
+        }
+        persist(user);
         return user;
     }
 
-    public Collection<User> getAllCustomers() {return usersById.values();}
+    public List<User> getAllCustomers() {
+        return listAll();
+    }
 
-    public Optional<User> getUserById(String userId) {
-        return Optional.ofNullable(usersById.get(userId));}
+    public Optional<User> getUserById(UUID userId) {
+        return findByIdOptional(userId);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return find("email", email).firstResultOptional();
+    }
+
+
+    public User update(User user) {
+        if (isPersistent(user)) {
+            return getEntityManager().merge(user);
+        } else {
+            persist(user);
+            return user;
+        }
+    }
+
+
+    public boolean deleteById(UUID userId) {
+        Optional<User> userOptional = findByIdOptional(userId);
+        userOptional.ifPresent(this::delete);
+        return false;
+    }
 }

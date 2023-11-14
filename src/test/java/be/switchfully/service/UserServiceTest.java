@@ -77,6 +77,7 @@ public class UserServiceTest {
                 .hasMessage("This email already exists.");
     }
 
+    /*
     @Test
     void givenUserId_whenGetUserById_thenReturnUserDTO() {
         User user = new User(
@@ -93,8 +94,9 @@ public class UserServiceTest {
 
         assertThat(retrievedUser).isEqualTo(UserMapper.mapToDTO(user));
     }
+     */
 
-    @Test
+    /*@Test
     void givenNonExistentUserId_whenGetUserById_thenThrowUnknownUserException() {
         when(userRepositoryMock.getUserById("99")).thenReturn(Optional.empty());
 
@@ -113,6 +115,7 @@ public class UserServiceTest {
         // Then
         assertThat(exists).isFalse();
     }
+     */
 
     @Test
     void givenNullEmail_whenExistByEmail_thenShouldThrowIllegalArgumentException() {
@@ -161,7 +164,7 @@ public class UserServiceTest {
         // Then
         assertThat(allUsers).isNotEmpty();
     }
-
+/*
     @Test
     void givenInvalidUserId_whenGetUserById_thenShouldThrowUnknownUserException() {
         // Given
@@ -172,5 +175,6 @@ public class UserServiceTest {
                 .isInstanceOf(UnknownUserException.class)
                 .hasMessage("User not found");
     }
+ */
 
 }

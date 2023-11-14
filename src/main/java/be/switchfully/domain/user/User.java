@@ -1,21 +1,36 @@
 package be.switchfully.domain.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
+@Entity
+@Table(name = "users", schema = "eurderdb")
 public class User {
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+    @Column(name = "firstname", nullable = false)
     private String firstName;
+    @Column(name = "lastname", nullable = false)
     private String lastName;
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+    @Column(name = "address")
     private String address;
+    @Column(name = "phoneNumber")
     private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     private Role role;
+    @JsonIgnore
+    @Column(name = "password", nullable = false)
     private String password;
 
     public User(String firstName, String lastName, String email, String address, String phoneNumber, Role role, String password) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -27,7 +42,7 @@ public class User {
 
 
     public User(String firstName, String lastName, String email, String address, String phoneNumber, String password) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -35,6 +50,9 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.role = Role.CUSTOMER;
         this.password = password;
+    }
+
+    protected User() {
     }
 
 
@@ -46,11 +64,11 @@ public class User {
         this.role = role;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -113,14 +131,29 @@ public class User {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(email, user.email) && Objects.equals(address, user.address) && Objects.equals(phoneNumber, user.phoneNumber) && role == user.role && Objects.equals(password, user.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, email, address, phoneNumber, role, password);
+    }
+
+    @Override
     public String toString() {
-        return "Customer{" +
-                "id='" + id + '\'' +
+        return "User{" +
+                "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", role=" + role +
+                ", password='" + password + '\'' +
                 '}';
     }
 }

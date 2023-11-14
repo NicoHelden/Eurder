@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import static jakarta.ws.rs.core.Response.Status.*;
 
@@ -75,9 +76,11 @@ public class UserController {
     public Response getUserById(@PathParam("id") String id, @HeaderParam("Authorization") String authorization) {
         securityService.validateAuthorization(authorization, Feature.GET_CUSTOMER_DETAILS);
         try {
-            UserDTO user = userService.getUserById(id);
+            UUID userId = UUID.fromString(id);
+            UserDTO user = userService.getUserById(userId);
             return Response.ok(user).build();
-        } catch (UnknownUserException e) {
+        } catch (IllegalArgumentException | UnknownUserException e) {
+
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
     }

@@ -5,20 +5,16 @@ import be.switchfully.domain.user.User;
 import be.switchfully.domain.user.UserDTO;
 import be.switchfully.mapper.UserMapper;
 import be.switchfully.repository.UserRepository;
-import be.switchfully.service.exception.InvalidEmailException;
 import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnknownUserException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static be.switchfully.database.EurderDb.usersById;
 
 @ApplicationScoped
 public class UserService {
@@ -26,50 +22,41 @@ public class UserService {
     UserRepository userRepository;
 
     public boolean existByEmail(String emailToCheck) {
-        if (emailToCheck == null) {
+        if (emailToCheck == null || emailToCheck.isBlank()) {
             throw new IllegalArgumentException("Email must be filled");
         }
-        return userRepository.getAllCustomers().stream()
-                .anyMatch(customer -> customer.getEmail().equals(emailToCheck));
-    }
-
-    public boolean isActiveEmail(String emailToCheck) {
-        try {
-            URL url = new URL("https://api.emailable.com/v1/verify?email=" + emailToCheck + "&api_key=test_a4ecacdcc9c880c33e7a");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int status = connection.getResponseCode();
-            if (status == 200) {
-                return true;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed email validation, " + e);
-        }
-        return false;
+        return userRepository.findByEmail(emailToCheck).isPresent();
     }
 
     public boolean isValidEmail(String emailAddress) {
         String regexPattern = "^(.+)@(\\S+)$";
-        //^(.+)@(\S+) $
         return Pattern.compile(regexPattern)
                 .matcher(emailAddress)
                 .matches();
     }
-    public UserDTO registerUser(CreateUserDTO createUserDTO) throws NonUniqueEmailException {
+
+    public UserDTO registerUser(CreateUserDTO createUserDTO) {
         if (existByEmail(createUserDTO.getEmail())) {
             throw new NonUniqueEmailException("This email already exists.");
         }
         if (!isValidEmail(createUserDTO.getEmail())) {
-            throw new InvalidEmailException("This email is no valid.");
+            throw new IllegalArgumentException("This email is not valid.");
         }
-        return UserMapper.mapToDTO(userRepository.save(UserMapper.mapToEntity(createUserDTO)));
+        User newUser = UserMapper.mapToEntity(createUserDTO);
+
+        newUser = userRepository.save(newUser);
+        return UserMapper.mapToDTO(newUser);
     }
+
     public Collection<UserDTO> getAllUsers() {
-        return userRepository.getAllCustomers().stream().map(UserMapper::mapToDTO).collect(Collectors.toSet());
+        return userRepository.listAll().stream()
+                .map(UserMapper::mapToDTO)
+                .collect(Collectors.toList());
     }
-    public UserDTO getUserById(String id) {
-        Optional<User> optionalUser = userRepository.getUserById(id);
-        if(!optionalUser.isPresent()) {
+
+    public UserDTO getUserById(UUID userId) {
+        Optional<User> optionalUser = userRepository.findByIdOptional(userId);
+        if (optionalUser.isEmpty()) {
             throw new UnknownUserException("User not found");
         }
         return UserMapper.mapToDTO(optionalUser.get());

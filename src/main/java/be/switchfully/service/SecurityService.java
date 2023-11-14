@@ -14,6 +14,7 @@ import org.jboss.logging.Logger;
 
 import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -26,24 +27,28 @@ public class SecurityService {
     public void validateAuthorization(@Nullable String authorization, Feature feature) {
         DecodedCredentials credentials = getIdPassword(Optional.ofNullable(authorization)
                 .orElseThrow(() -> new UnauthorizedException("Wrong credentials")));
-        User user = userRepository.getUserById(credentials.id())
-                .orElseThrow(() -> throwUserUnknownException(credentials.id()));
+
+
+        UUID userId = UUID.fromString(credentials.id());
+
+
+        User user = userRepository.findByIdOptional(userId)
+                .orElseThrow(() -> throwUserUnknownException(userId));
 
         if (!user.doesPasswordMatch(credentials.password())) {
-            logger.errorf("Password does not match for user %s", credentials.id());
-            throw new WrongPasswordException("Password does not match for user " + credentials.id());
+            logger.errorf("Password does not match for user %s", userId);
+            throw new WrongPasswordException("Password does not match for user " + userId);
         }
 
         if (!user.canHaveAccessTo(feature)) {
-            logger.error(format("User %s does not have access to %s", credentials.id(), feature));
-            throw new UnauthorizedException("User " + credentials.id() + " does not have access to " + feature);
+            logger.errorf("User %s does not have access to %s", userId, feature);
+            throw new UnauthorizedException("User " + userId + " does not have access to " + feature);
         }
-
     }
 
-    private UnknownUserException throwUserUnknownException(String id) {
-        logger.errorf("Unknown user %s", id);
-        return new UnknownUserException();
+    private RuntimeException throwUserUnknownException(UUID userId) {
+        logger.errorf("Unknown user %s", userId);
+        return new UnknownUserException("User " + userId + " is unknown");
     }
 
     private DecodedCredentials getIdPassword(String authorization) {
@@ -53,12 +58,5 @@ public class SecurityService {
         return new DecodedCredentials(id, password);
     }
 
-    public String getUserIdFromAuthorization(String authorization) {
-        DecodedCredentials credentials = getIdPassword(authorization);
-        String id = credentials.id();
-        User user = userRepository.getUserById(id)
-                .orElseThrow(() -> throwUserUnknownException(id));
-        return user.getId();
-    }
 
 }

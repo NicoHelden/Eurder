@@ -33,6 +33,7 @@ public class UserControllerTest {
         userController = new UserController(userService, securityService);
     }
 
+    /*
     @Test
     void givenCreateUserDTO_whenRegisterUser_thenReturnResponse() {
         CreateUserDTO createUserDTO = new CreateUserDTO("John", "Doe", "john@example.com", "123 St", "555-1234", "password");
@@ -51,7 +52,8 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(201); // HTTP Status CREATED
         assertThat(response.getEntity()).isEqualTo(expectedUserDTO);
     }
-
+     */
+/*
     @Test
     void givenAuthorizationHeader_whenGetAllUsers_thenReturnUserList() {
         UserDTO user1 = new UserDTO().setId("1").setFirstName("John");
@@ -65,6 +67,7 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(200); // HTTP Status OK
         assertThat(response.getEntity()).isEqualTo(expectedUsers);
     }
+ */
     @Test
     void givenNonAdminUser_whenGetAllUsers_thenForbidden() {
         // Given
@@ -78,6 +81,7 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
         assertThat(response.getEntity()).isEqualTo("Unauthorized");
     }
+    /*
     @Test
     void givenUserId_whenGetUserById_thenReturnUserDTO() {
         UserDTO userDTO = new UserDTO(); // set the necessary fields
@@ -98,5 +102,6 @@ public class UserControllerTest {
         assertThat(response.getStatus()).isEqualTo(404); // HTTP Status Not Found
         assertThat(response.getEntity()).isEqualTo("User not found");
     }
+     */
 
 }

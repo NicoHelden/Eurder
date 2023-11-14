@@ -1,41 +1,35 @@
 package be.switchfully.repository;
 
 import be.switchfully.domain.item.Item;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static be.switchfully.database.EurderDb.itemsById;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @ApplicationScoped
-public class ItemRepository {
+public class ItemRepository implements PanacheRepositoryBase<Item, UUID> {
 
-    private final Map<String, Item> itemsById;
-
-    public ItemRepository() {
-        itemsById = new HashMap<>();
-    }
-
+    @Transactional
     public Item save(Item item) {
-        if (itemsById.containsKey(item.getId())) {
-            throw new IllegalArgumentException("Item with the same ID already exists.");
-        }
-        itemsById.put(item.getId(), item);
-        return item;
-    }
-    public Item update(Item item) {
-        if (!itemsById.containsKey(item.getId())) {
-            throw new NotFoundException("Item with the given ID not found.");
-        }
-        itemsById.put(item.getId(), item);
+        persist(item);
         return item;
     }
 
-    public Set<Item> getAll() {
-        return new HashSet<>(itemsById.values());
+    @Transactional
+    public Item update(Item item) {
+        Optional<Item> existingItem = findByIdOptional(item.getId());
+        if (existingItem.isPresent()) {
+            return getEntityManager().merge(item);
+        } else {
+            throw new NotFoundException("Item with ID " + item.getId() + " not found.");
+        }
+    }
+
+    public List<Item> getAll() {
+        return listAll();
     }
 }
