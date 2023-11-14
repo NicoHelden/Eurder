@@ -15,7 +15,7 @@ public class UserTest {
         String email = "nciolas.heldenbergh@email.com";
         String address = "Some Street 1";
         String phoneNumber = "1234567890";
-        String password = "123";
+        String password = "123456";
 
         // When
         User user = new User(firstName, lastName, email, address, phoneNumber, password);
