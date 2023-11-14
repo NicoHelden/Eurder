@@ -3,7 +3,6 @@ package be.switchfully.domain.user;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RoleTest {
 
@@ -23,7 +22,6 @@ class RoleTest {
     void customerRoleHasAccessToCustomerFeatures() {
         assertThat(Role.CUSTOMER.hasAccessTo(Feature.ORDER_ITEM)).isTrue();
         assertThat(Role.CUSTOMER.hasAccessTo(Feature.GET_REPORT_ORDERS)).isTrue();
-
 
 
         assertThat(Role.CUSTOMER.hasAccessTo(Feature.ADD_ITEM)).isFalse();
