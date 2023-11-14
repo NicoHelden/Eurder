@@ -11,7 +11,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID id; // JPA will generate this when persisting
     @Column(name = "firstname", nullable = false)
     private String firstName;
     @Column(name = "lastname", nullable = false)
@@ -30,7 +30,7 @@ public class User {
     private String password;
 
     public User(String firstName, String lastName, String email, String address, String phoneNumber, Role role, String password) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID(); // Constructors should NOT set the id, JPA will handle it
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -42,7 +42,7 @@ public class User {
 
 
     public User(String firstName, String lastName, String email, String address, String phoneNumber, String password) {
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

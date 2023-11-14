@@ -9,6 +9,7 @@ import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnknownUserException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class UserService {
                 .matches();
     }
 
+    @Transactional
     public UserDTO registerUser(CreateUserDTO createUserDTO) {
         if (existByEmail(createUserDTO.getEmail())) {
             throw new NonUniqueEmailException("This email already exists.");

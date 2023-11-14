@@ -1,4 +1,6 @@
 package be.switchfully.domain.user;
 
-public record DecodedCredentials(String id, String password) {
+import java.util.UUID;
+
+public record DecodedCredentials(String email, String password) {
 }

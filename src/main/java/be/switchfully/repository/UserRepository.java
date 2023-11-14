@@ -14,9 +14,10 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
 
     public User save(User user) {
         if (user.getId() == null) {
-            user.setId(UUID.randomUUID());
+            persist(user); // This is fine for a new entity without an ID
+        } else {
+            user = getEntityManager().merge(user); // For an existing entity
         }
-        persist(user);
         return user;
     }
 
@@ -40,6 +41,9 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
             persist(user);
             return user;
         }
+    }
+    public Optional<User> findByUsername(String username) {
+        return find("username", username).firstResultOptional();
     }
 
 

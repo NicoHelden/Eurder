@@ -5,7 +5,6 @@ import be.switchfully.domain.user.Feature;
 import be.switchfully.domain.user.UserDTO;
 import be.switchfully.service.SecurityService;
 import be.switchfully.service.UserService;
-import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnauthorizatedException;
 import be.switchfully.service.exception.UnknownUserException;
 import be.switchfully.service.exception.WrongPasswordException;
