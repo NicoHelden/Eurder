@@ -13,7 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,10 +25,8 @@ class ItemControllerTest {
 
     @Mock
     private ItemService mockItemService;
-
     @Mock
     private SecurityService mockSecurityService;
-
     @InjectMocks
     private ItemController itemController;
 
@@ -35,17 +36,10 @@ class ItemControllerTest {
 
     @BeforeEach
     void setUp() {
-        createItemDTO = new CreateItemDTO();
-        createItemDTO.setName("Laptop");
-        createItemDTO.setDescription("High-end laptop");
-        createItemDTO.setPrice(1000.0);
-        createItemDTO.setAmount(10);
+        createItemDTO = new CreateItemDTO("Laptop", "High-end laptop", 1000.0, 10);
 
-        itemDTO = new ItemDTO();
-        itemDTO.setName("Laptop");
-        itemDTO.setDescription("High-end laptop");
-        itemDTO.setPrice(1000.0);
-        itemDTO.setAmount(10);
+        UUID itemId = UUID.randomUUID(); // Generate a random UUID for testing
+        itemDTO = new ItemDTO(itemId, "Laptop", "High-end laptop", 1000.0, 10);
 
         authorizationHeader = "Basic SomeValidAuthToken";
     }
@@ -72,13 +66,20 @@ class ItemControllerTest {
 
     @Test
     void givenUnauthorized_whenCreateItem_thenThrowUnauthorizatedException() {
-        doThrow(UnauthorizatedException.class).when(mockSecurityService).validateAuthorization(anyString(), any());
+        // Setup the conditions to throw UnauthorizatedException
+        doThrow(UnauthorizatedException.class)
+                .when(mockSecurityService)
+                .validateAuthorization(anyString(), any());
 
-        Response result = itemController.createItem(authorizationHeader, createItemDTO);
+        // Act - Call the method that should throw the exception
+        Response result = null;
+        try {
+            result = itemController.createItem(authorizationHeader, createItemDTO);
+            fail("Expected an UnauthorizatedException to be thrown");
+        } catch (UnauthorizatedException e) {
+            // Assert - Verify that the exception was thrown
+            assertThat(e).isInstanceOf(UnauthorizatedException.class);
+        }
 
-        assertThat(result.getStatus()).isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
-        // Additional assertions...
     }
-
-    // Additional tests for other scenarios...
 }

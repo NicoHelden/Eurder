@@ -1,6 +1,7 @@
 package be.switchfully.webapi;
 
 import be.switchfully.domain.user.CreateUserDTO;
+import be.switchfully.domain.user.Role;
 import be.switchfully.domain.user.UserDTO;
 import be.switchfully.service.SecurityService;
 import be.switchfully.service.UserService;
@@ -38,7 +39,7 @@ public class UserControllerTest {
     @Test
     public void testRegisterUser() {
         CreateUserDTO createUserDTO = new CreateUserDTO("John", "Doe", "john@example.com", "123 Street", "1234567890", "password");
-        UserDTO userDTO = new UserDTO(); // Initialize with user details
+        UserDTO userDTO = new UserDTO(UUID.randomUUID(), "John", "Doe", "john@example.com", "123 Street", "1234567890", Role.CUSTOMER, "password");
 
         Mockito.when(userService.registerUser(any())).thenReturn(userDTO);
 
@@ -52,7 +53,8 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers() {
-        Mockito.when(userService.getAllUsers()).thenReturn(Collections.singletonList(new UserDTO()));
+        UserDTO sampleUserDTO = new UserDTO(UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "456 Avenue", "0987654321", Role.CUSTOMER, "secret");
+        Mockito.when(userService.getAllUsers()).thenReturn(Collections.singletonList(sampleUserDTO));
 
         given()
                 .when().get()
@@ -64,7 +66,8 @@ public class UserControllerTest {
     @Test
     public void testGetUserById() {
         UUID userId = UUID.randomUUID();
-        UserDTO userDTO = new UserDTO(); // Initialize with user details
+        UserDTO userDTO = new UserDTO(userId, "Emily", "Smith", "emily@example.com", "789 Road", "1122334455", Role.CUSTOMER, "password123");
+
         Mockito.when(userService.getUserById(userId)).thenReturn(userDTO);
 
         given()

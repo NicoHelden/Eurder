@@ -3,6 +3,7 @@ package be.switchfully.service;
 import be.switchfully.domain.user.CreateUserDTO;
 import be.switchfully.domain.user.User;
 import be.switchfully.domain.user.UserDTO;
+import be.switchfully.domain.user.Role;
 import be.switchfully.repository.UserRepository;
 import be.switchfully.service.exception.NonUniqueEmailException;
 import be.switchfully.service.exception.UnknownUserException;
@@ -32,16 +33,15 @@ public class UserServiceTest {
 
     private CreateUserDTO createUserDTO;
     private User user;
-    private UserDTO userDTO;
     private UUID userId;
 
     @BeforeEach
     void setUp() {
         createUserDTO = new CreateUserDTO("John", "Doe", "john@example.com", "123 Street", "1234567890", "password");
-        user = new User("John", "Doe", "john@example.com", "123 Street", "1234567890", "password");
-        userDTO = new UserDTO(); // Initialize with user details
         userId = UUID.randomUUID();
+        user = new User("John", "Doe", "john@example.com", "123 Street", "1234567890", Role.CUSTOMER, "password");
         user.setId(userId);
+        UserDTO userDTO = new UserDTO(userId, "John", "Doe", "john@example.com", "123 Street", "1234567890", Role.CUSTOMER, "password");
     }
 
     @Test
@@ -63,8 +63,7 @@ public class UserServiceTest {
         UserDTO result = userService.registerUser(createUserDTO);
 
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo(createUserDTO.getEmail());
-        // Other assertions
+        assertThat(result.getEmail()).isEqualTo("john@example.com");
 
         verify(userRepository, times(1)).save(any(User.class));
     }
@@ -88,7 +87,7 @@ public class UserServiceTest {
         UserDTO result = userService.getUserById(userId);
 
         assertThat(result).isNotNull();
-        // Other assertions
+        assertThat(result.getId()).isEqualTo(userId);
 
         verify(userRepository, times(1)).findByIdOptional(userId);
     }

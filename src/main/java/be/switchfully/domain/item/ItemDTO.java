@@ -8,62 +8,45 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ItemDTO {
-    private UUID id;
+    private final UUID id;
     @NotBlank(message = "Name cannot be blank")
-    private String name;
-    private String description;
+    private final String name;
+    private final String description;
     @NotNull(message = "Price cannot be null")
     @Min(value = 0, message = "Price must be a positive value")
-    private Double price;
+    private final Double price;
     @NotNull(message = "Amount cannot be null")
     @Min(value = 0, message = "Amount must be a non-negative number")
-    private int amount;
+    private final int amount;
 
+    public ItemDTO(UUID id, String name, String description, Double price, int amount) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.amount = amount;
+    }
 
     public UUID getId() {
         return id;
-    }
-
-    public ItemDTO setId(UUID id) {
-        this.id = id;
-        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public ItemDTO setName(String name) {
-        this.name = name;
-        return this;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public ItemDTO setDescription(String description) {
-        this.description = description;
-        return this;
     }
 
     public Double getPrice() {
         return price;
     }
 
-    public ItemDTO setPrice(Double price) {
-        this.price = price;
-        return this;
-    }
-
     public int getAmount() {
         return amount;
     }
 
-    public ItemDTO setAmount(int amount) {
-        this.amount = amount;
-        return this;
-    }
 
     @Override
     public boolean equals(Object o) {

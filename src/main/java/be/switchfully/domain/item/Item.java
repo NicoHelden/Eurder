@@ -11,24 +11,25 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-
     @Column(name = "name", nullable = false)
     private String name;
-
     @Column(name = "description")
-    private String description;
-
+    private final String description;
     @Column(name = "price", nullable = false)
-    private Double price;
-
+    private final Double price;
     @Column(name = "amount", nullable = false)
-    private int amount;
+    private final int amount;
 
     protected Item() {
+
+        this.name = null;
+        this.description = null;
+        this.price = null;
+        this.amount = 0;
     }
 
     public Item(String name, String description, Double price, int amount) {
-        //this.id = UUID.randomUUID();
+
         this.name = name;
         this.description = description;
         this.price = price;
@@ -40,41 +41,26 @@ public class Item {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
 
     public int getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -99,4 +85,20 @@ public class Item {
                 ", amount=" + amount +
                 '}';
     }
+
+    public void setId(UUID id) {
+        if (this.id == null) {
+            this.id = id;
+        } else {
+            throw new IllegalStateException("Cannot change the ID of an existing entity");
+        }
+    }
+    public void updateName(String newName) {
+        if (newName != null && !newName.isBlank()) {
+            this.name = newName;
+        } else {
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+    }
+
 }

@@ -6,15 +6,22 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateItemDTO {
     @NotBlank(message = "Name is required")
-    private String name;
-    private String description;
+    private final String name;
+    private final String description;
     @NotNull(message = "Price is required")
     @Min(value = 0, message = "Price must be positive")
-    private Double price;
+    private final Double price;
     @NotNull(message = "Amount is required")
     @Min(value = 0, message = "Amount must be non-negative")
-    private int amount;
+    private final int amount;
 
+
+    public CreateItemDTO(String name, String description, Double price, int amount) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.amount = amount;
+    }
 
     public String getName() {
         return name;
@@ -30,22 +37,6 @@ public class CreateItemDTO {
 
     public int getAmount() {
         return amount;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 
 }

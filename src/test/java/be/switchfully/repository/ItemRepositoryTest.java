@@ -59,13 +59,27 @@ public class ItemRepositoryTest {
     @Transactional
     void givenItemId_whenUpdateItem_thenShouldReturnUpdatedItem() {
         // Given
-        testItem.setName("Updated Name");
+        Item originalItem = itemRepository.save(new Item("Original Name", "Description", 10.0, 5));
+        itemRepository.getEntityManager().flush();
 
         // When
-        Item updatedItem = itemRepository.update(testItem);
+        UUID originalItemId = originalItem.getId();
+        Item itemToUpdate = itemRepository.findById(originalItemId);
+                //.orElseThrow(() -> new IllegalStateException("Item not found"));
+
+        // Use the updateName method to change the name
+        itemToUpdate.updateName("Updated Name");
+        itemRepository.update(itemToUpdate);
+
+        // Manually flush and clear the entity manager
+        itemRepository.getEntityManager().flush();
+        itemRepository.getEntityManager().clear();
+
+        // Fetch the updated item again
+        Item updatedItem = itemRepository.findById(originalItemId);
+                //.orElseThrow(() -> new IllegalStateException("Item not found after update"));
 
         // Then
-        assertThat(updatedItem).isNotNull();
         assertThat(updatedItem.getName()).isEqualTo("Updated Name");
     }
 

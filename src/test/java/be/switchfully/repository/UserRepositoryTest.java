@@ -21,8 +21,6 @@ public class UserRepositoryTest {
     @Inject
     UserRepository userRepository;
 
-    private User testUser;
-
     @Test
     @Transactional
     void givenCustomer_whenSave_thenShouldReturnSavedCustomer() {
@@ -43,25 +41,32 @@ public class UserRepositoryTest {
         assertThat(savedUser.getPassword()).isEqualTo(user.getPassword());
         assertThat(savedUser.getRole()).isEqualTo(user.getRole());
     }
+
     @Test
     @Transactional
     void whenGetAllCustomers_thenShouldReturnListOfAllCustomers() {
+        // Generate a unique email for the test
+        String uniqueEmail = "user" + System.currentTimeMillis() + "@test.com";
+
         // Given
-        testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
+        User testUser = new User("Nicolas", "Heldenbergh", uniqueEmail, "Some Street 1", "1234567890", "123456");
         userRepository.save(testUser);
+
         // When
         List<User> users = userRepository.getAllCustomers();
 
         // Then
         assertThat(users).isNotEmpty();
-        assertThat(users).contains(testUser);
+        assertThat(users).anyMatch(user -> user.getEmail().equals(uniqueEmail));
     }
+
     @Test
     @Transactional
     void givenUserId_whenGetUserById_thenShouldReturnUser() {
         // Given
-        testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
+        User testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
         userRepository.save(testUser);
+
         // When
         Optional<User> foundUser = userRepository.getUserById(testUser.getId());
 
@@ -69,12 +74,17 @@ public class UserRepositoryTest {
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get()).isEqualTo(testUser);
     }
+
     @Test
     @Transactional
     void givenUserEmail_whenFindByEmail_thenShouldReturnUser() {
+        // Generate a unique email
+        String uniqueEmail = "nicolas" + UUID.randomUUID().toString() + "@email.com";
+
         // Given
-        testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
+        User testUser = new User("Nicolas", "Heldenbergh", uniqueEmail, "Some Street 1", "1234567890", "123456");
         userRepository.save(testUser);
+
         // When
         Optional<User> foundUser = userRepository.findByEmail(testUser.getEmail());
 
@@ -82,26 +92,40 @@ public class UserRepositoryTest {
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get()).isEqualTo(testUser);
     }
+
     @Test
     @Transactional
     void givenUpdatedUser_whenUpdate_thenShouldReturnUpdatedUser() {
+        // Generate a unique email
+        String uniqueEmail = "nicolas" + UUID.randomUUID().toString() + "@email.com";
+
         // Given
-        testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
-        userRepository.save(testUser);
-        testUser.setFirstName("Updated Name");
+        User testUser = new User("Nicolas", "Heldenbergh", uniqueEmail, "Some Street 1", "1234567890", "123456");
+        testUser = userRepository.save(testUser);
+        UUID userId = testUser.getId();
+
+        // Retrieve the entity from the database
+        User userToUpdate = userRepository.findByIdOptional(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        // Update the entity
+        userToUpdate.setFirstName("Updated Name");
 
         // When
-        User updatedUser = userRepository.update(testUser);
+        User updatedUser = userRepository.update(userToUpdate);
 
         // Then
-        assertThat(updatedUser).isNotNull();
         assertThat(updatedUser.getFirstName()).isEqualTo("Updated Name");
     }
+
     @Test
     @Transactional
     void givenUserId_whenDeleteById_thenShouldDeleteUser() {
+        // Generate a unique email
+        String uniqueEmail = "nicolas" + UUID.randomUUID().toString() + "@email.com";
+
         // Given
-        testUser = new User("Nicolas", "Heldenbergh", "nicolas@email.com", "Some Street 1", "1234567890", "123456");
+        User testUser = new User("Nicolas", "Heldenbergh", uniqueEmail, "Some Street 1", "1234567890", "123456");
         userRepository.save(testUser);
         UUID userId = testUser.getId();
 
@@ -112,5 +136,4 @@ public class UserRepositoryTest {
         // Then
         assertThat(deletedUser).isEmpty();
     }
-
 }

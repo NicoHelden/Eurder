@@ -7,16 +7,15 @@ import be.switchfully.domain.user.UserDTO;
 public class UserMapper {
 
     public static UserDTO mapToDTO(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setFirstName(user.getFirstName());
-        userDTO.setLastName(user.getLastName());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setPhoneNumber(user.getPhoneNumber());
-        userDTO.setRole(user.getRole());
-
-        return userDTO;
+        return new UserDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getAddress(),
+                user.getPhoneNumber(),
+                user.getRole(),
+                user.getPassword());
     }
 
     public static User mapToEntity(CreateUserDTO createUserDTO) {

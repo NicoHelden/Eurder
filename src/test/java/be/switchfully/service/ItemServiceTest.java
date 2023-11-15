@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -20,7 +22,6 @@ class ItemServiceTest {
 
     @Mock
     ItemRepository itemRepository;
-
     @InjectMocks
     ItemService itemService;
 
@@ -29,17 +30,10 @@ class ItemServiceTest {
 
     @BeforeEach
     void setUp() {
-        newItem = new CreateItemDTO();
-        newItem.setName("Laptop");
-        newItem.setDescription("High-end laptop");
-        newItem.setPrice(1000.0);
-        newItem.setAmount(10);
+        newItem = new CreateItemDTO("Laptop", "High-end laptop", 1000.0, 10);
 
-        expectedItemDTO = new ItemDTO()
-                .setName("Laptop")
-                .setDescription("High-end laptop")
-                .setPrice(1000.0)
-                .setAmount(10);
+        UUID expectedId = UUID.randomUUID(); // Generate a random UUID for testing
+        expectedItemDTO = new ItemDTO(expectedId, "Laptop", "High-end laptop", 1000.0, 10);
     }
 
     @Test
