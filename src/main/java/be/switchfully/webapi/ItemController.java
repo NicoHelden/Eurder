@@ -18,6 +18,8 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.security.SecuritySchemes;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
+import java.util.List;
+
 import static jakarta.ws.rs.core.Response.Status.*;
 
 @SecuritySchemes(value = {
@@ -37,6 +39,19 @@ public class ItemController {
     public ItemController(ItemService itemService, SecurityService securityService) {
         this.itemService = itemService;
         this.securityService = securityService;
+    }
+
+    @GET
+    @SecurityRequirement(name = "SecurityScheme")
+    @Operation(
+            operationId = "getAllItems",
+            summary = "Get all items",
+            description = "Retrieve a list of all items from the database"
+    )
+    public Response getAllItems(@HeaderParam("Authorization") String authorization) {
+        securityService.validateAuthorization(authorization, Feature.VIEW_ALL_ITEMS);
+        List<ItemDTO> items = itemService.getAllItems();
+        return Response.status(OK).entity(items).build();
     }
 
     @POST

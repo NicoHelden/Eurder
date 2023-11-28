@@ -7,6 +7,9 @@ import be.switchfully.mapper.ItemMapper;
 import be.switchfully.repository.ItemRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @ApplicationScoped
 public class ItemService {
     private final ItemRepository itemRepository;
@@ -25,5 +28,10 @@ public class ItemService {
         Item itemEntity = ItemMapper.mapToEntity(updatedItem);
         Item savedItem = itemRepository.update(itemEntity);
         return ItemMapper.mapToDTO(savedItem);
+    }
+
+    public List<ItemDTO> getAllItems() {
+        List<Item> items = itemRepository.getAll();
+        return items.stream().map(ItemMapper::mapToDTO).collect(Collectors.toList());
     }
 }
