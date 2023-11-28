@@ -3,7 +3,7 @@ package be.switchfully.domain.user;
 import java.util.List;
 
 public enum Role {
-    ADMIN(List.of(Feature.ADD_ITEM, Feature.UPDATE_ITEM, Feature.GET_ALL_USERS, Feature.GET_CUSTOMER_DETAILS, Feature.GET_ITEMS_SHIPPING_TODAY, Feature.GET_ITEM_OVERVIEW)),
+    ADMIN(List.of(Feature.ADD_ITEM, Feature.UPDATE_ITEM, Feature.GET_ALL_USERS, Feature.GET_CUSTOMER_DETAILS, Feature.GET_ITEMS_SHIPPING_TODAY, Feature.GET_ITEM_OVERVIEW, Feature.VIEW_ALL_ITEMS)),
     CUSTOMER(List.of(Feature.ORDER_ITEM, Feature.GET_REPORT_ORDERS, Feature.REORDER_EXISTING_ORDER));
 
     private final List<Feature> featureList;
